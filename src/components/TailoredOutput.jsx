@@ -9,13 +9,8 @@ function TailoredOutput({ tailoredLatex, score }) {
       <h2>Tailored Resume — LaTeX</h2>
       {score !== null && (
         <div className="score-section">
-          <div className={`score ${score.overall >= 75 ? "good" : score.overall >= 60 ? "okay" : "low"}`}>
-            <div>
-              <span>Estimated ATS Score</span>
-              <div style={{fontSize: "0.75rem", color: "#888", marginTop: "0.25rem"}}>
-                Base match: {score.base}% → After tailoring: {score.overall}%
-              </div>
-            </div>
+          <div className={`score ${score.overall >= 85 ? "good" : score.overall >= 65 ? "okay" : "low"}`}>
+            <span>Overall ATS Score</span>
             <strong>{score.overall}%</strong>
           </div>
           <div className="score-breakdown">

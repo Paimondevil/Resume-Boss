@@ -7,15 +7,15 @@ const client = new Groq({
   dangerouslyAllowBrowser: true,
 });
 
-function JDInput({ latexCode, setTailoredLatex, setScore, setLoading, loading, jdValue, setJdValue }) {
+function JDInput({ latexCode, setTailoredLatex, setScore, setLoading, loading }) {
   const [jd, setJd] = useState("");
 
   const handleTailor = async () => {
-    if (!jdValue.trim()) return alert("Please paste a job description.");
+    if (!jd.trim()) return alert("Please paste a job description.");
     if (!latexCode.trim()) return alert("Please paste your LaTeX resume code first.");
     setLoading(true);
 
-    const { techMatches, actionMatches } = extractJDKeywords(jdValue);
+    const { techMatches, actionMatches } = extractJDKeywords(jd);
     const keywordsToHit = [...techMatches, ...actionMatches].slice(0, 25).join(", ");
 
     try {
@@ -68,7 +68,7 @@ function JDInput({ latexCode, setTailoredLatex, setScore, setLoading, loading, j
           },
           {
             role: "user",
-            content: `Here is my LaTeX resume:\n\n${latexCode}\n\nHere is the job description:\n\n${jdValue}\n\nTailor only the \\resumeItem content and Technical Skills values. Keep ALL metrics. Return the complete LaTeX file starting with %-------------------------`,
+            content: `Here is my LaTeX resume:\n\n${latexCode}\n\nHere is the job description:\n\n${jd}\n\nTailor only the \\resumeItem content and Technical Skills values. Keep ALL metrics. Return the complete LaTeX file starting with %-------------------------`,
           },
         ],
         temperature: 0.2,
@@ -81,7 +81,7 @@ function JDInput({ latexCode, setTailoredLatex, setScore, setLoading, loading, j
       tailored = tailored.replace(/(?<!\\)C#/g, "C\\#");
 
       setTailoredLatex(tailored);
-      setScore(scoreResume(jdValue, tailored, latexCode));
+      setScore(scoreResume(jd, tailored));
     } catch (err) {
       alert("Something went wrong: " + err.message);
     } finally {
@@ -94,8 +94,8 @@ function JDInput({ latexCode, setTailoredLatex, setScore, setLoading, loading, j
       <h2>Job Description</h2>
       <textarea
         placeholder="Paste the job description here..."
-        value={jdValue}
-        onChange={(e) => setJdValue(e.target.value)}
+        value={jd}
+        onChange={(e) => setJd(e.target.value)}
         rows={10}
       />
       <button onClick={handleTailor} disabled={loading}>

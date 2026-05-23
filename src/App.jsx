@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import JDInput from "./components/JDInput";
 import TailoredOutput from "./components/TailoredOutput";
-import { checkJobFit } from "./utils/scoring";
 import "./index.css";
 
 const DEFAULT_LATEX = `% Paste your LaTeX resume code here and it will be saved automatically`;
@@ -12,28 +11,12 @@ function App() {
   const [score, setScore] = useState(null);
   const [loading, setLoading] = useState(false);
   const [editingLatex, setEditingLatex] = useState(false);
-  const [fitWarning, setFitWarning] = useState(null);
-  const [jdValue, setJdValue] = useState("");
 
   useEffect(() => {
     if (latexCode !== DEFAULT_LATEX) {
       localStorage.setItem("resumeLatex", latexCode);
     }
   }, [latexCode]);
-
-  // Check job fit whenever JD changes
-  useEffect(() => {
-    if (!jdValue.trim() || latexCode === DEFAULT_LATEX) {
-      setFitWarning(null);
-      return;
-    }
-    const { fitScore, missing, warning } = checkJobFit(jdValue, latexCode);
-    if (warning) {
-      setFitWarning({ fitScore, missing, warning });
-    } else {
-      setFitWarning(null);
-    }
-  }, [jdValue, latexCode]);
 
   return (
     <div className="app">
@@ -64,31 +47,12 @@ function App() {
           )}
         </div>
 
-        {fitWarning && (
-          <div className={`fit-warning ${fitWarning.warning}`}>
-            <div className="fit-warning-header">
-              {fitWarning.warning === "strong"
-                ? "🔴 Strong Mismatch — This job may not be worth applying to"
-                : "🟡 Moderate Mismatch — Some required skills are missing"}
-            </div>
-            <p>Your resume matches only <strong>{fitWarning.fitScore}%</strong> of the required skills for this role.</p>
-            <p>Missing skills: {fitWarning.missing.slice(0, 8).map((k, i) => (
-              <span key={i} className="keyword-tag">{k}</span>
-            ))}</p>
-            <p style={{ marginTop: "0.5rem", fontSize: "0.8rem", color: "#888" }}>
-              You can still tailor and apply, but managing expectations is advised.
-            </p>
-          </div>
-        )}
-
         <JDInput
           latexCode={latexCode}
           setTailoredLatex={setTailoredLatex}
           setScore={setScore}
           setLoading={setLoading}
           loading={loading}
-          jdValue={jdValue}
-          setJdValue={setJdValue}
         />
 
         {tailoredLatex && (
