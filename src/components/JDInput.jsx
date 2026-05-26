@@ -15,7 +15,17 @@ function JDInput({ latexCode, setTailoredLatex, setScore, setLoading, loading })
     if (!latexCode.trim()) return alert("Please paste your LaTeX resume code first.");
     setLoading(true);
 
-    const { techMatches, actionMatches } = extractJDKeywords(jd);
+    const sanitize = (str) => str
+      .replace(/[\u2013\u2014]/g, '--')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2026]/g, '...')
+      .replace(/[^\x00-\x7F]/g, ' ');
+
+    const sanitizedJD = sanitize(jd);
+    const sanitizedResume = sanitize(latexCode);
+
+    const { techMatches, actionMatches } = extractJDKeywords(sanitizedJD);
     const keywordsToHit = [...techMatches, ...actionMatches].slice(0, 25).join(", ");
 
     try {
@@ -68,7 +78,7 @@ function JDInput({ latexCode, setTailoredLatex, setScore, setLoading, loading })
           },
           {
             role: "user",
-            content: `Here is my LaTeX resume:\n\n${latexCode}\n\nHere is the job description:\n\n${jd}\n\nTailor only the \\resumeItem content and Technical Skills values. Keep ALL metrics. Return the complete LaTeX file starting with %-------------------------`,
+            content: `Here is my LaTeX resume:\n\n${sanitizedResume}\n\nHere is the job description:\n\n${sanitizedJD}\n\nTailor only the \\resumeItem content and Technical Skills values. Keep ALL metrics. Return the complete LaTeX file starting with %-------------------------`,
           },
         ],
         temperature: 0.2,
