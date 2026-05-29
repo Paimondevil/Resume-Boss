@@ -233,3 +233,70 @@ button:disabled {
   color: #ccc;
   margin-bottom: 0.25rem;
 }
+
+/* Add these to your existing index.css */
+
+.status-msg {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0.5rem 0;
+  font-style: italic;
+}
+
+.score-panel {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.score-main {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.score-breakdown {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.missing-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.missing-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.keyword-tag {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.keyword-tag.red {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.keyword-tag.yellow {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.keyword-tag.gray {
+  background: #f3f4f6;
+  color: #4b5563;
+}

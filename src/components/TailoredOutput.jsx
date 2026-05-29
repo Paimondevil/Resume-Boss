@@ -1,58 +1,51 @@
 function TailoredOutput({ tailoredLatex, score }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(tailoredLatex);
-    alert("Copied! Paste it in Overleaf.");
+    alert("LaTeX copied! Paste into Overleaf.");
   };
+
+  const color = (n, t) => n / t >= 0.8 ? "#22c55e" : n / t >= 0.5 ? "#f59e0b" : "#ef4444";
 
   return (
     <div className="card">
-      <h2>Tailored Resume — LaTeX</h2>
-      {score !== null && (
-        <div className="score-section">
-          <div className={`score ${score.overall >= 85 ? "good" : score.overall >= 65 ? "okay" : "low"}`}>
-            <span>Overall ATS Score</span>
-            <strong>{score.overall}%</strong>
+      <div className="card-header">
+        <h2>Tailored Resume</h2>
+        <button className="btn-secondary" onClick={handleCopy}>Copy LaTeX</button>
+      </div>
+
+      {score && (
+        <div className="score-panel">
+          <div className="score-main" style={{ color: score.overall >= 75 ? "#22c55e" : score.overall >= 55 ? "#f59e0b" : "#ef4444" }}>
+            {score.overall}% ATS Match
           </div>
+
           <div className="score-breakdown">
-            <div className="score-item">
-              <span>Tech Keywords</span>
-              <strong>{score.techScore}%</strong>
-            </div>
-            <div className="score-item">
-              <span>Action Verbs</span>
-              <strong>{score.actionScore}%</strong>
-            </div>
-            <div className="score-item">
-              <span>Soft Skills</span>
-              <strong>{score.softScore}%</strong>
-            </div>
+            <span>Tier 1 (Required): <strong style={{ color: color(score.tier1.matched, score.tier1.total) }}>{score.tier1.matched}/{score.tier1.total}</strong></span>
+            <span>Tier 2 (Nice-to-have): <strong style={{ color: color(score.tier2.matched, score.tier2.total) }}>{score.tier2.matched}/{score.tier2.total}</strong></span>
+            <span>Tier 3 (Context): <strong>{score.tier3.matched}/{score.tier3.total}</strong></span>
           </div>
-          {score.missingTech.length > 0 && (
+
+          {score.tier1.missing.length > 0 && (
             <div className="missing-keywords">
-              <span>Missing tech: </span>
-              {score.missingTech.map((k, i) => (
-                <span key={i} className="keyword-tag">{k}</span>
-              ))}
+              <span className="missing-label">⚠️ Missing Required:</span>
+              {score.tier1.missing.map(w => <span key={w} className="keyword-tag red">{w}</span>)}
             </div>
           )}
-          {score.missingSoft.length > 0 && (
-            <div className="missing-keywords" style={{marginTop: "0.5rem"}}>
-              <span>Missing soft skills: </span>
-              {score.missingSoft.map((k, i) => (
-                <span key={i} className="keyword-tag" style={{borderColor: "#854d0e", color: "#fcd34d"}}>{k}</span>
-              ))}
+          {score.tier2.missing.length > 0 && (
+            <div className="missing-keywords">
+              <span className="missing-label">💡 Missing Nice-to-have:</span>
+              {score.tier2.missing.map(w => <span key={w} className="keyword-tag yellow">{w}</span>)}
             </div>
           )}
         </div>
       )}
+
       <textarea
         value={tailoredLatex}
-        onChange={() => {}}
-        rows={20}
         readOnly
-        style={{ fontFamily: "monospace", fontSize: "0.8rem" }}
+        rows={20}
+        style={{ fontFamily: "monospace", fontSize: "0.75rem" }}
       />
-      <button onClick={handleCopy}>Copy LaTeX → Paste in Overleaf</button>
     </div>
   );
 }

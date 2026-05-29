@@ -1,85 +1,68 @@
-const containsWord = (text, word) => {
-  const t = text.toLowerCase();
-  const w = word.toLowerCase();
-  if (w === "c#" || w === "csharp") {
-    return t.includes("c#") || t.includes("c\\#") || t.includes("c\\\\#");
+// Score uses AI-extracted keywords so it matches what Jobscan sees
+
+export const scoreResume = (keywords, resumeText) => {
+  const text = resumeText.toLowerCase();
+
+  const SYNONYMS = {
+  "problem-solving": ["problem-solving", "problem solving", "troubleshoot", "debugging"],
+  "analytical thinking": ["analytical", "analysis", "problem-solving", "algorithms"],
+  "communication": ["communication", "communicat", "collaborated", "collaboration"],
+  "collaboration": ["collaboration", "collaborated", "cross-functional", "teamwork"],
+  "willingness to learn": ["continuous", "learning", "improvement", "development"],
+  "cloud technologies": ["aws", "azure", "gcp", "cloud"],
+  "cloud platforms": ["aws", "azure", "gcp", "cloud", "vercel"],
+  "automation frameworks": ["ci/cd", "jenkins", "automation", "automated"],
+  "scripting": ["python", "bash", "powershell", "shell", "script"],
+  "it service management": ["sdlc", "agile", "devops", "incident"],
+  "onsite-offshore delivery model": ["cross-functional", "global", "collaboration"],
+};
+
+const check = (word) => {
+  const w = word.toLowerCase().trim();
+  if (!w) return false;
+
+  // Check synonyms first
+  if (SYNONYMS[w]) {
+    return SYNONYMS[w].some(syn => text.includes(syn));
   }
-  if (w === "ci/cd") {
-    return t.includes("ci/cd") || t.includes("ci\\/cd");
+
+  if (w === "c#") return text.includes("c#") || text.includes("c\\#");
+  if (w === "ci/cd") return text.includes("ci/cd");
+  if (w === ".net") return text.includes(".net");
+
+  // Multi-word: all parts must appear
+  if (w.includes(" ")) {
+    const parts = w.split(" ").filter(p => p.length > 2);
+    return parts.every(part => text.includes(part));
   }
-  if (w === ".net") {
-    return t.includes(".net") || t.includes("\\.net");
-  }
-  if (w === "asp.net") {
-    return t.includes("asp.net") || t.includes("asp\\.net");
-  }
-  if (/[#$^*+?.()|[\]{}\/]/.test(w)) {
-    return t.includes(w);
-  }
+
   try {
-    const clean = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`\\b${clean}\\b`, 'i').test(t);
+    const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`\\b${escaped}\\b`, "i").test(text);
   } catch {
-    return t.includes(w);
+    return text.includes(w);
   }
 };
 
-const containsStem = (text, stem) => {
-  return text.toLowerCase().includes(stem.toLowerCase());
-};
+  const tier1 = keywords.filter(k => k.tier === 1);
+  const tier2 = keywords.filter(k => k.tier === 2);
+  const tier3 = keywords.filter(k => k.tier === 3);
 
-export const extractJDKeywords = (jd) => {
-  const text = jd.toLowerCase();
+  const matchedT1 = tier1.filter(k => check(k.word));
+  const matchedT2 = tier2.filter(k => check(k.word));
+  const matchedT3 = tier3.filter(k => check(k.word));
 
-  const techList = [
-    "c#", ".net", "asp.net", "react", "angular", "python", "javascript",
-    "typescript", "java", "sql", "aws", "azure", "docker", "kubernetes",
-    "git", "github", "agile", "scrum", "rest", "api", "html", "css",
-    "mysql", "redis", "devops", "microservices", "linux", "jenkins",
-    "nosql", "ci/cd", "cloud", "software development", "version control"
-  ];
-  const techMatches = techList.filter(t => containsWord(text, t));
+  const t1Rate = tier1.length ? matchedT1.length / tier1.length : 1;
+  const t2Rate = tier2.length ? matchedT2.length / tier2.length : 1;
+  const t3Rate = tier3.length ? matchedT3.length / tier3.length : 1;
 
-  const actionList = [
-    "develop", "design", "implement", "optimiz", "collaborat",
-    "deploy", "build", "maintain", "improv", "automat", "integrat",
-    "debug", "refactor", "troubleshoot", "contribut", "participat",
-    "deliver", "architect", "manag", "resolv"
-  ];
-  const actionMatches = actionList.filter(a => containsStem(text, a));
-
-  const softList = [
-  "collaborat", "communicat", "problem-solv", "teamwork", "improvement"
-];
-  const softMatches = softList.filter(s => containsStem(text, s));
-
-  return { techMatches, actionMatches, softMatches };
-};
-
-export const scoreResume = (jd, tailored) => {
-  const { techMatches, actionMatches, softMatches } = extractJDKeywords(jd);
-
-  const matchRate = (keywords, isStem = false) => {
-    if (!keywords.length) return 1;
-    const matched = keywords.filter(w =>
-      isStem ? containsStem(tailored, w) : containsWord(tailored, w)
-    ).length;
-    return matched / keywords.length;
-  };
-
-  const techRate = matchRate(techMatches);
-  const actionRate = matchRate(actionMatches, true);
-  const softRate = matchRate(softMatches, true);
-
-  const overall = Math.round((techRate * 0.5 + actionRate * 0.3 + softRate * 0.2) * 100);
+  // Tier 1 worth 60%, tier 2 worth 30%, tier 3 worth 10%
+  const overall = Math.round((t1Rate * 0.6 + t2Rate * 0.3 + t3Rate * 0.1) * 100);
 
   return {
     overall,
-    techScore: Math.round(techRate * 100),
-    actionScore: Math.round(actionRate * 100),
-    softScore: Math.round(softRate * 100),
-    missingTech: techMatches.filter(w => !containsWord(tailored, w)),
-    missingAction: actionMatches.filter(w => !containsStem(tailored, w)),
-    missingSoft: softMatches.filter(w => !containsStem(tailored, w)),
+    tier1: { total: tier1.length, matched: matchedT1.length, missing: tier1.filter(k => !check(k.word)).map(k => k.word) },
+    tier2: { total: tier2.length, matched: matchedT2.length, missing: tier2.filter(k => !check(k.word)).map(k => k.word) },
+    tier3: { total: tier3.length, matched: matchedT3.length, missing: tier3.filter(k => !check(k.word)).map(k => k.word) },
   };
 };
