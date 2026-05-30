@@ -21,9 +21,50 @@ export const LOCKED_EXPERIENCE = `\\resumeSubheading
 \\resumeItemListEnd`;
 
 // ============================================================
+// VERIFIED SKILLS — everything you can back up in an interview
+// ============================================================
+export const VERIFIED_SKILLS = [
+  // Languages
+  "c", "c++", "python", "c#", "java", "javascript", "sql", "html", "css", "kotlin",
+  // Frontend
+  "react", "react.js", "tailwind", "tailwind css", "framer motion", "lottie",
+  // Backend
+  ".net", "django", "flask", "rest apis", "rest api",
+  // Databases
+  "mysql", "sqlite", "relational design", "query optimization",
+  // Cloud
+  "aws", "ec2", "s3",
+  // Deployment
+  "vercel", "netlify", "cloudinary", "vite",
+  // Tools
+  "linux", "git", "visual studio", "eclipse", "jupyter notebook",
+  // Concepts
+  "data structures", "oop", "sdlc", "api design", "encryption", "authentication",
+  "machine learning", "data mining", "distributed systems", "data warehousing",
+  "high performance computing", "operating systems",
+  // Practices
+  "debugging", "performance optimization", "agile", "scrum", "agile/scrum",
+  // Soft skills — always safe
+  "collaboration", "communication", "problem-solving", "analytical thinking",
+  "teamwork", "leadership", "mentoring", "time management",
+];
+
+// ============================================================
+// DEFAULT SKILLS BLOCK
+// ============================================================
+export const DEFAULT_SKILLS = `\\textbf{Languages}{: C, C++, Python, C\\#, Java, JavaScript, SQL, Kotlin} \\\\
+\\textbf{Frontend}{: React.js, HTML, CSS, Tailwind CSS, Framer Motion, Lottie} \\\\
+\\textbf{Backend}{: .NET, Django, Flask, REST APIs} \\\\
+\\textbf{Databases}{: MySQL, SQLite, relational design, query optimization} \\\\
+\\textbf{Cloud}{: AWS (EC2, S3 -- foundational knowledge)} \\\\
+\\textbf{Deployment}{: Vercel, Netlify, Cloudinary} \\\\
+\\textbf{Tools}{: Linux, Git, Visual Studio, Eclipse, Jupyter Notebook, Vite} \\\\
+\\textbf{Concepts}{: Data Structures, OOP, SDLC, API design, Machine Learning, Distributed Systems} \\\\
+\\textbf{Practices}{: Debugging, performance optimization, Agile/Scrum}`;
+
+// ============================================================
 // FULL CERTIFICATES POOL
 // ============================================================
-
 export const CERTS_POOL = [
   { name: "AWS APAC Solutions Architecture", issuer: "Amazon Web Services", year: 2023, tags: ["aws", "cloud", "architecture", "infrastructure", "s3", "ec2"] },
   { name: "SAP Technical Consulting", issuer: "SAP", year: 2023, tags: ["sap", "enterprise", "consulting", "it service", "enterprise applications"] },
@@ -38,9 +79,46 @@ export const CERTS_POOL = [
 ];
 
 // ============================================================
-// LATEX TEMPLATE — placeholders for dynamic sections
+// PROJECT BULLET POOLS
 // ============================================================
+export const PROJECT_BULLETS = {
+  resumeBoss: [
+    "Built an AI-powered resume tailoring web app using React and Groq API, automating keyword extraction and LaTeX generation to match job descriptions.",
+    "Engineered a tiered keyword extraction system and ATS scoring engine in JavaScript, achieving score alignment within 15% of industry tools like Jobscan.",
+    "Developed a full-stack AI application with React and Vite, integrating LLM prompt engineering workflows to automate resume customization for job applications.",
+    "Designed and deployed a production React app on Vercel, implementing Groq API integration, localStorage persistence, and real-time ATS scoring.",
+    "Built an end-to-end AI resume optimization tool, engineering structured JSON prompts for LLM output parsing and dynamic LaTeX assembly.",
+    "Implemented a frequency-based keyword placement engine and cert selector using JavaScript, reducing resume tailoring time from hours to seconds.",
+  ],
+  dataHub: [
+    "Built a secure file-sharing platform using Python and Flask, implementing PIN-based encryption and SQLite-backed user authentication.",
+    "Designed and implemented a custom encryption system in Python to secure user-uploaded files, with PIN-based decryption and hashed password storage.",
+    "Developed a full-stack web application with Python/Flask backend and SQLite database, featuring user auth, encrypted file storage, and secure retrieval.",
+    "Engineered backend REST routes and database schemas in Python/Flask, implementing end-to-end file encryption and session-based access control.",
+    "Built a peer-to-peer data sharing platform with Python, Flask, and SQLite, implementing custom encryption logic and secure multi-user file management.",
+    "Implemented secure file upload and retrieval system using Python/Flask with SHA-based password hashing and PIN-encrypted content delivery.",
+  ],
+  traffic: [
+    "Developed a real-time traffic management simulator using advanced scheduling algorithms to optimize vehicle flow and reduce congestion.",
+    "Built a dynamic React-based dashboard to visualize traffic data, improving simulated traffic efficiency by 35% through algorithmic problem-solving.",
+    "Designed and implemented a scheduling algorithm engine in JavaScript, reducing simulated congestion by 35% through state-based traffic management.",
+    "Built an interactive React frontend with real-time data visualization, demonstrating full-stack development and algorithmic problem-solving skills.",
+    "Engineered a traffic simulation system using React and JavaScript, applying data structures and scheduling concepts to model real-world vehicle flow.",
+    "Developed automated scheduling logic to manage traffic signal timing, improving throughput by 35% through algorithm optimization and state management.",
+  ],
+  goodwill: [
+    "Engineered and deployed an interactive business platform, optimizing page load speeds by 30% through efficient asset management and code splitting.",
+    "Implemented responsive UI components and fluid animations using Framer Motion, ensuring 100% cross-browser compatibility and accessibility.",
+    "Built a production-ready React web application for a real client, delivering responsive UI, Framer Motion animations, and 30% faster load times.",
+    "Deployed a client-facing business website on Vercel with Tailwind CSS and Framer Motion, achieving 100% cross-browser compatibility.",
+    "Optimized frontend performance by 30% through code splitting and asset management, while implementing accessible, mobile-first UI components.",
+    "Collaborated with a client to gather requirements and deliver an interactive React platform, improving page speed by 30% and ensuring accessibility.",
+  ],
+};
 
+// ============================================================
+// LATEX TEMPLATE
+// ============================================================
 export const LATEX_TEMPLATE = `%-------------------------
 % Resume in Latex
 % Author : Jake Gutierrez
@@ -165,19 +243,9 @@ export const LATEX_TEMPLATE = `%-------------------------
 \\section{Projects \\hfill \\small \\href{https://deveshfolio.vercel.app/}{\\color{blue}Portfolio \\& Demos}}
 \\resumeSubHeadingListStart
 
-\\resumeProjectHeading
-{\\textbf{Traffic Controller System} $|$ \\emph{React, JavaScript, Scheduling Algorithms, CSS} $|$ \\href{https://traffic-controll-neon.vercel.app/}{\\color{blue}Live Demo}}{}
-\\resumeItemListStart
-%%TRAFFIC_1%%
-%%TRAFFIC_2%%
-\\resumeItemListEnd
+%%PROJECT_1%%
 
-\\resumeProjectHeading
-{\\textbf{GoodWill Enterprises Website} $|$ \\emph{React, Tailwind CSS, Framer Motion, Vercel} $|$ \\href{https://goodwill-enterprises.vercel.app}{\\color{blue}Live Demo}}{}
-\\resumeItemListStart
-%%GOODWILL_1%%
-%%GOODWILL_2%%
-\\resumeItemListEnd
+%%PROJECT_2%%
 
 \\resumeSubHeadingListEnd
 
