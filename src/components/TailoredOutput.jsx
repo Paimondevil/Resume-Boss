@@ -9,17 +9,27 @@ function TailoredOutput({ tailoredLatex, score }) {
   };
 
   const scoreColor = (s) => {
-    if (s >= 75) return "#22c55e";
-    if (s >= 50) return "#f59e0b";
-    return "#ef4444";
+    if (s >= 75) return "var(--green)";
+    if (s >= 50) return "var(--amber)";
+    return "var(--red)";
   };
 
   const tierColor = (matched, total) => {
-    if (!total) return "#22c55e";
+    if (!total) return "var(--green)";
     const r = matched / total;
-    if (r >= 0.8) return "#22c55e";
-    if (r >= 0.5) return "#f59e0b";
-    return "#ef4444";
+    if (r >= 0.8) return "var(--green)";
+    if (r >= 0.5) return "var(--amber)";
+    return "var(--red)";
+  };
+
+  const highlightNew = (line, beforeWords) => {
+    return line.split(/\s+/).map((word, wi) => {
+      const clean = word.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const isNew = clean.length > 3 && !beforeWords.has(word.toLowerCase()) && !beforeWords.has(clean);
+      return isNew
+        ? <span key={wi} className="diff-highlight">{word} </span>
+        : <span key={wi}>{word} </span>;
+    });
   };
 
   return (
@@ -38,31 +48,43 @@ function TailoredOutput({ tailoredLatex, score }) {
 
       {score && (
         <div className="score-panel">
+          {/* Main Score */}
           <div className="score-main" style={{ color: scoreColor(score.overall) }}>
-            {score.overall}% ATS Match
+            {score.overall}%
+            <span style={{
+              fontSize: "1rem",
+              fontWeight: 400,
+              color: "var(--text-muted)",
+              marginLeft: "0.5rem",
+              fontFamily: "'Space Grotesk', sans-serif",
+            }}>
+              ATS Match
+            </span>
           </div>
 
+          {/* Tier Breakdown */}
           <div className="score-breakdown">
             <span>
-              Tier 1 (Required):{" "}
+              T1 Required:{" "}
               <strong style={{ color: tierColor(score.tier1.matched, score.tier1.total) }}>
                 {score.tier1.matched}/{score.tier1.total}
               </strong>
             </span>
             <span>
-              Tier 2 (Nice-to-have):{" "}
+              T2 Nice-to-have:{" "}
               <strong style={{ color: tierColor(score.tier2.matched, score.tier2.total) }}>
                 {score.tier2.matched}/{score.tier2.total}
               </strong>
             </span>
             <span>
-              Tier 3 (Context):{" "}
-              <strong>
+              T3 Context:{" "}
+              <strong style={{ color: "var(--text-muted)" }}>
                 {score.tier3.matched}/{score.tier3.total}
               </strong>
             </span>
           </div>
 
+          {/* Missing Required */}
           {score.tier1.missing.length > 0 && (
             <div className="missing-keywords">
               <span className="missing-label">⚠️ Missing Required:</span>
@@ -72,6 +94,7 @@ function TailoredOutput({ tailoredLatex, score }) {
             </div>
           )}
 
+          {/* Missing Nice-to-have */}
           {score.tier2.missing.length > 0 && (
             <div className="missing-keywords">
               <span className="missing-label">💡 Missing Nice-to-have:</span>
@@ -81,18 +104,13 @@ function TailoredOutput({ tailoredLatex, score }) {
             </div>
           )}
 
+          {/* Skill Warnings */}
           {score.skillWarnings?.length > 0 && (
-            <div className="missing-keywords" style={{
-              marginTop: "0.75rem",
-              padding: "0.75rem",
-              background: "#fff7ed",
-              border: "1px solid #fed7aa",
-              borderRadius: "6px"
-            }}>
-              <span className="missing-label" style={{ color: "#c2410c", fontWeight: 600 }}>
+            <div className="verify-warning" style={{ marginTop: "0.75rem" }}>
+              <span className="verify-warning-label">
                 ⚠️ Verify before submitting — AI added these, make sure you can back them up:
               </span>
-              <div style={{ marginTop: "0.4rem", display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
                 {score.skillWarnings.map(w => (
                   <span key={w} className="keyword-tag red">{w}</span>
                 ))}
@@ -102,90 +120,45 @@ function TailoredOutput({ tailoredLatex, score }) {
         </div>
       )}
 
+      {/* Diff Viewer */}
       {showDiff && score?.diff && (
-        <div style={{
-          marginBottom: "1rem",
-          border: "1px solid #e5e7eb",
-          borderRadius: "8px",
-          overflow: "hidden",
-          fontSize: "0.82rem",
-        }}>
-          <div style={{
-            padding: "0.75rem 1rem",
-            background: "#f3f4f6",
-            fontWeight: 600,
-            fontSize: "0.9rem",
-            borderBottom: "1px solid #e5e7eb",
-            color: "#111827",
-          }}>
-            What changed
-          </div>
+        <div className="diff-container">
+          <div className="diff-header">// WHAT CHANGED</div>
 
           {score.diff.length === 0 ? (
-            <p style={{ padding: "1rem", color: "#6b7280" }}>No changes detected.</p>
+            <div style={{ padding: "1rem", color: "var(--text-dim)", fontFamily: "'Space Mono', monospace", fontSize: "0.8rem" }}>
+              No changes detected.
+            </div>
           ) : (
             score.diff.map((section, i) => {
-              // Find words in "after" that are NOT in "before"
-              const beforeWords = new Set(section.original.toLowerCase().split(/\s+/));
-              const highlightNew = (text) => {
-                return text.split(/\s+/).map((word, wi) => {
-                  const clean = word.toLowerCase().replace(/[^a-z0-9]/g, "");
-                  const isNew = clean.length > 3 && !beforeWords.has(word.toLowerCase()) && !beforeWords.has(clean);
-                  return (
-                    <span key={wi} style={{
-                      background: isNew ? "#bbf7d0" : "transparent",
-                      color: "#111827",
-                      borderRadius: "2px",
-                      padding: isNew ? "0 2px" : "0",
-                    }}>
-                      {word}{" "}
-                    </span>
-                  );
-                });
-              };
+              const beforeWords = new Set(
+                section.original.toLowerCase().split(/\s+/)
+              );
 
               return (
-                <div key={i} style={{ borderBottom: i < score.diff.length - 1 ? "1px solid #e5e7eb" : "none" }}>
-                  <div style={{
-                    padding: "0.5rem 1rem",
-                    background: "#f9fafb",
-                    fontWeight: 600,
-                    fontSize: "0.8rem",
-                    color: "#374151",
-                    borderBottom: "1px solid #e5e7eb",
-                  }}>
-                    📌 {section.name}
+                <div key={i} style={{
+                  borderBottom: i < score.diff.length - 1
+                    ? "1px solid rgba(249, 115, 22, 0.08)"
+                    : "none"
+                }}>
+                  <div className="diff-section-title">
+                    ◆ {section.name}
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                  <div className="diff-columns">
                     {/* BEFORE */}
-                    <div style={{
-                      padding: "0.75rem",
-                      borderRight: "1px solid #e5e7eb",
-                      whiteSpace: "pre-wrap",
-                      lineHeight: "1.7",
-                      color: "#374151",
-                      fontFamily: "monospace",
-                      overflowY: "auto",
-                      maxHeight: "220px",
-                      background: "#ffffff",
-                    }}>
-                      <div style={{ fontWeight: 600, marginBottom: "0.4rem", color: "#6b7280", fontFamily: "sans-serif", fontSize: "0.75rem" }}>BEFORE</div>
-                      {section.original}
+                    <div className="diff-col diff-col-before">
+                      <span className="diff-col-label">BEFORE</span>
+                      {section.original || (
+                        <span style={{ color: "var(--text-dim)", fontStyle: "italic" }}>
+                          — empty —
+                        </span>
+                      )}
                     </div>
-                    {/* AFTER — highlight new words in green */}
-                    <div style={{
-                      padding: "0.75rem",
-                      whiteSpace: "pre-wrap",
-                      lineHeight: "1.7",
-                      color: "#111827",
-                      fontFamily: "monospace",
-                      overflowY: "auto",
-                      maxHeight: "220px",
-                      background: "#ffffff",
-                    }}>
-                      <div style={{ fontWeight: 600, marginBottom: "0.4rem", color: "#15803d", fontFamily: "sans-serif", fontSize: "0.75rem" }}>AFTER</div>
+                    {/* AFTER */}
+                    <div className="diff-col diff-col-after">
+                      <span className="diff-col-label">AFTER</span>
                       {section.updated.split("\n").map((line, li) => (
-                        <div key={li}>{highlightNew(line)}</div>
+                        <div key={li}>{highlightNew(line, beforeWords)}</div>
                       ))}
                     </div>
                   </div>
@@ -196,11 +169,11 @@ function TailoredOutput({ tailoredLatex, score }) {
         </div>
       )}
 
+      {/* LaTeX Output */}
       <textarea
         value={tailoredLatex}
         readOnly
         rows={20}
-        style={{ fontFamily: "monospace", fontSize: "0.75rem" }}
       />
     </div>
   );

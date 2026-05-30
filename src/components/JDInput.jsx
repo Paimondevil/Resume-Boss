@@ -393,9 +393,9 @@ ${wrap(bullets.freelance_2 || "Implemented CI/CD workflows using Git and cloud d
         onChange={(e) => setJd(e.target.value)}
         rows={10}
       />
-      {status && <p className="status-msg">⚙️ {status}</p>}
+      {status && <p className="status-msg">⚙ {status}</p>}
       <button onClick={handleTailor} disabled={loading}>
-        {loading ? "Tailoring..." : "Tailor My Resume"}
+        {loading ? "⚙ Tailoring..." : "⚡ Tailor My Resume"}
       </button>
     </div>
   );
