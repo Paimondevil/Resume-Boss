@@ -138,7 +138,7 @@ const buildDiff = (originalLatex, newLatex) => {
   })).filter(s => s.original !== s.updated);
 };
 
-function JDInput({ setTailoredLatex, setScore, setLoading, loading }) {
+function JDInput({ setTailoredLatex, setScore, setLoading, loading, onResult }) {
   const [jd, setJd] = useState("");
   const [status, setStatus] = useState("");
 
@@ -373,8 +373,8 @@ ${wrap(bullets.freelance_2 || "Implemented CI/CD workflows using Git and cloud d
       const diff = buildDiff(originalLatex, finalLatex);
 
       setTailoredLatex(finalLatex);
-      setScore({ ...scoreResume(keywords, finalLatex), skillWarnings, diff });
-      setStatus("");
+      const scoreData = { ...scoreResume(keywords, finalLatex), skillWarnings, diff };
+      if (onResult) { onResult(finalLatex, scoreData); } else { setTailoredLatex(finalLatex); setScore(scoreData); }
 
     } catch (err) {
       if (err.message !== "JSON parse failed") alert("Something went wrong: " + err.message);
@@ -394,6 +394,7 @@ ${wrap(bullets.freelance_2 || "Implemented CI/CD workflows using Git and cloud d
         rows={10}
       />
       {status && <p className="status-msg">⚙ {status}</p>}
+      <button className="btn-primary" onClick={handleTailor} disabled={loading}></button>
       <button onClick={handleTailor} disabled={loading}>
         {loading ? "⚙ Tailoring..." : "⚡ Tailor My Resume"}
       </button>
