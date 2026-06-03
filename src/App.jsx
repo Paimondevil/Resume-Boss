@@ -8,11 +8,13 @@ function App() {
   const [tailoredLatex, setTailoredLatex] = useState("");
   const [score, setScore] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [jd, setJd] = useState("");
   const outputRef = useRef(null);
 
-  const handleResult = (latex, scoreData) => {
+  const handleResult = (latex, scoreData, rawJd) => {
     setTailoredLatex(latex);
     setScore(scoreData);
+    setJd(rawJd);
     setTimeout(() => outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
 
@@ -39,15 +41,15 @@ function App() {
 
         <main>
           <JDInput
-            setTailoredLatex={() => {}}
-            setScore={() => {}}
+            setTailoredLatex={(l) => {}}
+            setScore={(s) => {}}
             setLoading={setLoading}
             loading={loading}
             onResult={handleResult}
           />
           {tailoredLatex && (
             <div ref={outputRef}>
-              <TailoredOutput tailoredLatex={tailoredLatex} score={score} />
+              <TailoredOutput tailoredLatex={tailoredLatex} score={score} jd={jd} />
             </div>
           )}
         </main>
