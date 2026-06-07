@@ -1,8 +1,50 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import JDInput from "./components/JDInput";
 import TailoredOutput from "./components/TailoredOutput";
 import ParticleField from "./components/ParticleField";
 import "./index.css";
+
+// 3D tilt + mouse-follow shine on cards
+function useTilt() {
+  useEffect(() => {
+    const cards = document.querySelectorAll(".card");
+    const handlers = [];
+
+    cards.forEach((card) => {
+      const onMove = (e) => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = (e.clientX - cx) / (rect.width / 2);
+        const dy = (e.clientY - cy) / (rect.height / 2);
+        const rx = -dy * 4;
+        const ry = dx * 4;
+        const mx = ((e.clientX - rect.left) / rect.width) * 100;
+        const my = ((e.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty("--rx", `${rx}deg`);
+        card.style.setProperty("--ry", `${ry}deg`);
+        card.style.setProperty("--mx", `${mx}%`);
+        card.style.setProperty("--my", `${my}%`);
+      };
+      const onLeave = () => {
+        card.style.setProperty("--rx", "0deg");
+        card.style.setProperty("--ry", "0deg");
+        card.style.transition = "transform 0.5s ease";
+        setTimeout(() => { card.style.transition = ""; }, 500);
+      };
+      card.addEventListener("mousemove", onMove);
+      card.addEventListener("mouseleave", onLeave);
+      handlers.push({ card, onMove, onLeave });
+    });
+
+    return () => {
+      handlers.forEach(({ card, onMove, onLeave }) => {
+        card.removeEventListener("mousemove", onMove);
+        card.removeEventListener("mouseleave", onLeave);
+      });
+    };
+  });
+}
 
 function App() {
   const [tailoredLatex, setTailoredLatex] = useState("");
@@ -10,6 +52,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [jd, setJd] = useState("");
   const outputRef = useRef(null);
+
+  useTilt();
 
   const handleResult = (latex, scoreData, rawJd) => {
     setTailoredLatex(latex);

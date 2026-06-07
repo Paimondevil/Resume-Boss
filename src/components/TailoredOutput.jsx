@@ -66,67 +66,47 @@ function TailoredOutput({ tailoredLatex, score, jd }) {
 
       {/* Resume Tab */}
       {activeTab === "resume" && (
-        <>
-          <div className="card-header" style={{ marginTop: "1rem" }}>
-            <h2>Tailored Resume</h2>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button className="btn-secondary" onClick={() => setShowDiff(!showDiff)}>
-                {showDiff ? "Hide Changes" : "Show Changes"}
-              </button>
-              <button
-                className={`btn-secondary btn-copy ${copied ? "btn-copied" : ""}`}
-                onClick={handleCopy}
-              >
-                {copied ? "✓ Copied!" : "Copy LaTeX"}
-              </button>
-            </div>
-          </div>
+        <div className="resume-tab-content">
 
-          {/* Score Panel */}
-          {score && (
-            <div className="score-panel">
-              <div className="score-layout">
-                <div className="score-ring-wrap">
-                  <ScoreRing score={score.overall} color={scoreColor(score.overall)} />
-                </div>
-                <div className="score-details">
+          {/* Side-by-side layout */}
+          <div className="resume-split">
+
+            {/* LEFT: Score Panel */}
+            <div className="split-left">
+              <div className="split-label">ATS Score</div>
+
+              {score && (
+                <div className="score-panel-left">
+                  <div className="score-ring-center">
+                    <ScoreRing score={score.overall} color={scoreColor(score.overall)} />
+                  </div>
+
                   <div className="score-breakdown">
-                    <div className="score-row">
-                      <span className="score-row-label">T1 Required</span>
-                      <div className="score-bar-track">
-                        <div className="score-bar-fill" style={{
-                          width: `${tierPct(score.tier1.matched, score.tier1.total)}%`,
-                          background: tierColor(score.tier1.matched, score.tier1.total),
-                        }} />
+                    {[
+                      { label: "T1 Required",     ...score.tier1, dimBar: false },
+                      { label: "T2 Nice-to-have", ...score.tier2, dimBar: false },
+                      { label: "T3 Context",      ...score.tier3, dimBar: true  },
+                    ].map(({ label, matched, total, dimBar }) => (
+                      <div className="score-row" key={label}>
+                        <span className="score-row-label">{label}</span>
+                        <div className="score-bar-track">
+                          <div className="score-bar-fill" style={{
+                            width: `${tierPct(matched, total)}%`,
+                            background: dimBar ? "var(--text-dim)" : tierColor(matched, total),
+                            color:       dimBar ? "var(--text-dim)" : tierColor(matched, total),
+                          }} />
+                        </div>
+                        <span style={{
+                          fontSize: "0.65rem",
+                          fontFamily: "Space Mono, monospace",
+                          color: dimBar ? "var(--text-muted)" : tierColor(matched, total),
+                          minWidth: "36px",
+                          textAlign: "right",
+                        }}>
+                          {matched}/{total}
+                        </span>
                       </div>
-                      <span style={{ fontSize: "0.72rem", fontFamily: "JetBrains Mono, monospace", color: tierColor(score.tier1.matched, score.tier1.total), minWidth: "36px", textAlign: "right" }}>
-                        {score.tier1.matched}/{score.tier1.total}
-                      </span>
-                    </div>
-                    <div className="score-row">
-                      <span className="score-row-label">T2 Nice-to-have</span>
-                      <div className="score-bar-track">
-                        <div className="score-bar-fill" style={{
-                          width: `${tierPct(score.tier2.matched, score.tier2.total)}%`,
-                          background: tierColor(score.tier2.matched, score.tier2.total),
-                        }} />
-                      </div>
-                      <span style={{ fontSize: "0.72rem", fontFamily: "JetBrains Mono, monospace", color: tierColor(score.tier2.matched, score.tier2.total), minWidth: "36px", textAlign: "right" }}>
-                        {score.tier2.matched}/{score.tier2.total}
-                      </span>
-                    </div>
-                    <div className="score-row">
-                      <span className="score-row-label">T3 Context</span>
-                      <div className="score-bar-track">
-                        <div className="score-bar-fill" style={{
-                          width: `${tierPct(score.tier3.matched, score.tier3.total)}%`,
-                          background: "var(--text-dim)",
-                        }} />
-                      </div>
-                      <span style={{ fontSize: "0.72rem", fontFamily: "JetBrains Mono, monospace", color: "var(--text-muted)", minWidth: "36px", textAlign: "right" }}>
-                        {score.tier3.matched}/{score.tier3.total}
-                      </span>
-                    </div>
+                    ))}
                   </div>
 
                   {score.tier1.missing.length > 0 && (
@@ -146,37 +126,67 @@ function TailoredOutput({ tailoredLatex, score, jd }) {
                       ))}
                     </div>
                   )}
-                </div>
-              </div>
 
-              {score.skillWarnings?.length > 0 && (
-                <div className="verify-warning">
-                  <span className="verify-warning-label">
-                    ⚠ Verify before submitting — AI added these:
-                  </span>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                    {score.skillWarnings.map(w => (
-                      <span key={w} className="keyword-tag red">{w}</span>
-                    ))}
-                  </div>
+                  {score.skillWarnings?.length > 0 && (
+                    <div className="verify-warning">
+                      <span className="verify-warning-label">⚠ Verify before submitting</span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                        {score.skillWarnings.map(w => (
+                          <span key={w} className="keyword-tag red">{w}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Diff toggle */}
+                  <button
+                    className="btn-secondary diff-toggle-btn"
+                    onClick={() => setShowDiff(!showDiff)}
+                    style={{ marginTop: "1rem", width: "100%" }}
+                  >
+                    {showDiff ? "▲ Hide Changes" : "▼ Show Changes"}
+                  </button>
                 </div>
               )}
             </div>
-          )}
 
-          {/* Diff Viewer */}
+            {/* RIGHT: LaTeX output with scan line */}
+            <div className="split-right">
+              <div className="split-right-header">
+                <span className="split-label">LaTeX Output</span>
+                <button
+                  className={`btn-secondary btn-copy ${copied ? "btn-copied" : ""}`}
+                  onClick={handleCopy}
+                >
+                  {copied ? "✓ Copied!" : "Copy LaTeX"}
+                </button>
+              </div>
+              <div className="latex-panel">
+                <div className="latex-scan-line" />
+                <textarea
+                  ref={textareaRef}
+                  value={tailoredLatex}
+                  readOnly
+                  rows={28}
+                  className="latex-output"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Diff Viewer (full width, below) */}
           {showDiff && score?.diff && (
-            <div className="diff-container">
+            <div className="diff-container" style={{ marginTop: "1.5rem" }}>
               <div className="diff-header">// WHAT CHANGED</div>
               {score.diff.length === 0 ? (
-                <div style={{ padding: "1rem", color: "var(--text-dim)", fontFamily: "JetBrains Mono, monospace", fontSize: "0.8rem" }}>
+                <div style={{ padding: "1rem", color: "var(--text-dim)", fontFamily: "Space Mono, monospace", fontSize: "0.8rem" }}>
                   No changes detected.
                 </div>
               ) : (
                 score.diff.map((section, i) => {
                   const beforeWords = new Set(section.original.toLowerCase().split(/\s+/));
                   return (
-                    <div key={i} style={{ borderBottom: i < score.diff.length - 1 ? "1px solid rgba(249,115,22,0.08)" : "none" }}>
+                    <div key={i} style={{ borderBottom: i < score.diff.length - 1 ? "1px solid rgba(0,245,212,0.06)" : "none" }}>
                       <div className="diff-section-title">◆ {section.name}</div>
                       <div className="diff-columns">
                         <div className="diff-col diff-col-before">
@@ -196,15 +206,8 @@ function TailoredOutput({ tailoredLatex, score, jd }) {
               )}
             </div>
           )}
-
-          {/* LaTeX Output */}
-          <div className="latex-wrap">
-            <div className="latex-label">LaTeX Output</div>
-            <textarea ref={textareaRef} value={tailoredLatex} readOnly rows={20} />
-          </div>
-        </>
+        </div>
       )}
-
     </div>
   );
 }

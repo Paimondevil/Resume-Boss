@@ -385,9 +385,15 @@ ${wrap(bullets.freelance_2 || "Implemented CI/CD workflows using Git and cloud d
   };
 
   return (
-    <div className="card">
-      <h2>Job Description</h2>
+    <div className="card jd-card">
+      <div className="jd-tab-bar">
+        <span className="jd-tab-label">
+          <span className="jd-tab-dot" />
+          Job Description
+        </span>
+      </div>
       <textarea
+        className="jd-textarea"
         placeholder="Paste the job description here..."
         value={jd}
         onChange={(e) => setJd(e.target.value)}
@@ -399,7 +405,7 @@ ${wrap(bullets.freelance_2 || "Implemented CI/CD workflows using Git and cloud d
         onClick={handleTailor}
         disabled={loading}
       >
-        {loading ? "Tailoring..." : "Tailor My Resume"}
+        {loading ? "Tailoring..." : "✦ Tailor My Resume"}
       </button>
     </div>
   );
