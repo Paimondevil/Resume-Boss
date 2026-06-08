@@ -240,7 +240,7 @@ export const LATEX_TEMPLATE = `%-------------------------
 \\resumeSubHeadingListEnd
 
 %-----------PROJECTS-----------
-\\section{Projects \\hfill \\small \\href{https://deveshfolio.vercel.app/}{\\color{blue}Portfolio \\& Demos}}
+\\section{Projects \\hfill \\small \\href{https://deveshfolio.vercel.app/}{\\color{blue}Portfolio \\& More Projects}}
 \\resumeSubHeadingListStart
 
 %%PROJECT_1%%
